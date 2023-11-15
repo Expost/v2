@@ -53,7 +53,13 @@ func (h *handler) fetchContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := processor.ProcessEntryWebPage(feed, entry, user); err != nil {
+	integration, err := h.store.Integration(loggedUserID)
+	if err != nil {
+		json.ServerError(w, r, err)
+		return
+	}
+
+	if err := processor.ProcessEntryWebPage(feed, entry, user, integration); err != nil {
 		json.ServerError(w, r, err)
 		return
 	}

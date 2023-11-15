@@ -37,6 +37,11 @@ func CreateFeedFromSubscriptionDiscovery(store *storage.Storage, userID int64, f
 		return nil, locale.NewLocalizedErrorWrapper(storeErr, "error.database_error", storeErr)
 	}
 
+	integration, storeErr := store.Integration(userID)
+	if storeErr != nil {
+		return nil, locale.NewLocalizedErrorWrapper(storeErr, "error.database_error", storeErr)
+	}
+
 	if !store.CategoryIDExists(userID, feedCreationRequest.CategoryID) {
 		return nil, locale.NewLocalizedErrorWrapper(ErrCategoryNotFound, "error.category_not_found")
 	}
@@ -56,6 +61,8 @@ func CreateFeedFromSubscriptionDiscovery(store *storage.Storage, userID int64, f
 	subscription.Username = feedCreationRequest.Username
 	subscription.Password = feedCreationRequest.Password
 	subscription.Crawler = feedCreationRequest.Crawler
+	subscription.MercuryCrawler = feedCreationRequest.MercuryCrawler
+	subscription.MediaProxy = feedCreationRequest.MediaProxy
 	subscription.Disabled = feedCreationRequest.Disabled
 	subscription.IgnoreHTTPCache = feedCreationRequest.IgnoreHTTPCache
 	subscription.AllowSelfSignedCertificates = feedCreationRequest.AllowSelfSignedCertificates
@@ -71,7 +78,7 @@ func CreateFeedFromSubscriptionDiscovery(store *storage.Storage, userID int64, f
 	subscription.WithCategoryID(feedCreationRequest.CategoryID)
 	subscription.CheckedNow()
 
-	processor.ProcessFeedEntries(store, subscription, user, true)
+	processor.ProcessFeedEntries(store, subscription, user, integration, true)
 
 	if storeErr := store.CreateFeed(subscription); storeErr != nil {
 		return nil, locale.NewLocalizedErrorWrapper(storeErr, "error.database_error", storeErr)
@@ -111,6 +118,11 @@ func CreateFeed(store *storage.Storage, userID int64, feedCreationRequest *model
 	)
 
 	user, storeErr := store.UserByID(userID)
+	if storeErr != nil {
+		return nil, locale.NewLocalizedErrorWrapper(storeErr, "error.database_error", storeErr)
+	}
+
+	integration, storeErr := store.Integration(userID)
 	if storeErr != nil {
 		return nil, locale.NewLocalizedErrorWrapper(storeErr, "error.database_error", storeErr)
 	}
@@ -157,6 +169,8 @@ func CreateFeed(store *storage.Storage, userID int64, feedCreationRequest *model
 	subscription.Username = feedCreationRequest.Username
 	subscription.Password = feedCreationRequest.Password
 	subscription.Crawler = feedCreationRequest.Crawler
+	subscription.MercuryCrawler = feedCreationRequest.MercuryCrawler
+	subscription.MediaProxy = feedCreationRequest.MediaProxy
 	subscription.Disabled = feedCreationRequest.Disabled
 	subscription.IgnoreHTTPCache = feedCreationRequest.IgnoreHTTPCache
 	subscription.AllowSelfSignedCertificates = feedCreationRequest.AllowSelfSignedCertificates
@@ -172,7 +186,7 @@ func CreateFeed(store *storage.Storage, userID int64, feedCreationRequest *model
 	subscription.WithCategoryID(feedCreationRequest.CategoryID)
 	subscription.CheckedNow()
 
-	processor.ProcessFeedEntries(store, subscription, user, true)
+	processor.ProcessFeedEntries(store, subscription, user, integration, true)
 
 	if storeErr := store.CreateFeed(subscription); storeErr != nil {
 		return nil, locale.NewLocalizedErrorWrapper(storeErr, "error.database_error", storeErr)
@@ -208,6 +222,11 @@ func RefreshFeed(store *storage.Storage, userID, feedID int64, forceRefresh bool
 	}
 
 	originalFeed, storeErr := store.FeedByID(userID, feedID)
+	if storeErr != nil {
+		return locale.NewLocalizedErrorWrapper(storeErr, "error.database_error", storeErr)
+	}
+
+	integrationInfo, storeErr := store.Integration(userID)
 	if storeErr != nil {
 		return locale.NewLocalizedErrorWrapper(storeErr, "error.database_error", storeErr)
 	}
@@ -302,7 +321,8 @@ func RefreshFeed(store *storage.Storage, userID, feedID int64, forceRefresh bool
 		}
 
 		originalFeed.Entries = updatedFeed.Entries
-		processor.ProcessFeedEntries(store, originalFeed, user, forceRefresh)
+
+		processor.ProcessFeedEntries(store, originalFeed, user, integrationInfo, forceRefresh)
 
 		// We don't update existing entries when the crawler is enabled (we crawl only inexisting entries). Unless it is forced to refresh
 		updateExistingEntries := forceRefresh || !originalFeed.Crawler

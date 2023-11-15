@@ -37,6 +37,8 @@ type Feed struct {
 	ScraperRules                string    `json:"scraper_rules"`
 	RewriteRules                string    `json:"rewrite_rules"`
 	Crawler                     bool      `json:"crawler"`
+	MercuryCrawler              bool      `json:"mercury_crawler"`
+	MediaProxy                  bool      `json:"media_proxy"`
 	BlocklistRules              string    `json:"blocklist_rules"`
 	KeeplistRules               string    `json:"keeplist_rules"`
 	UrlRewriteRules             string    `json:"urlrewrite_rules"`
@@ -133,6 +135,8 @@ type FeedCreationRequest struct {
 	Username                    string `json:"username"`
 	Password                    string `json:"password"`
 	Crawler                     bool   `json:"crawler"`
+	MercuryCrawler              bool   `json:"mercury_crawler"`
+	MediaProxy                  bool   `json:"media_proxy"`
 	Disabled                    bool   `json:"disabled"`
 	NoMediaPlayer               bool   `json:"no_media_player"`
 	IgnoreHTTPCache             bool   `json:"ignore_http_cache"`
@@ -158,6 +162,8 @@ type FeedCreationRequestFromSubscriptionDiscovery struct {
 	Username                    string `json:"username"`
 	Password                    string `json:"password"`
 	Crawler                     bool   `json:"crawler"`
+	MercuryCrawler              bool   `json:"mercury_crawler"`
+	MediaProxy                  bool   `json:"media_proxy"`
 	Disabled                    bool   `json:"disabled"`
 	NoMediaPlayer               bool   `json:"no_media_player"`
 	IgnoreHTTPCache             bool   `json:"ignore_http_cache"`
@@ -182,6 +188,8 @@ type FeedModificationRequest struct {
 	KeeplistRules               *string `json:"keeplist_rules"`
 	UrlRewriteRules             *string `json:"urlrewrite_rules"`
 	Crawler                     *bool   `json:"crawler"`
+	MercuryCrawler              *bool   `json:"mercury_crawler"`
+	MediaProxy                  *bool   `json:"media_proxy"`
 	UserAgent                   *string `json:"user_agent"`
 	Cookie                      *string `json:"cookie"`
 	Username                    *string `json:"username"`
@@ -231,6 +239,14 @@ func (f *FeedModificationRequest) Patch(feed *Feed) {
 
 	if f.Crawler != nil {
 		feed.Crawler = *f.Crawler
+	}
+
+	if f.MercuryCrawler != nil {
+		feed.MediaProxy = *f.MercuryCrawler
+	}
+
+	if f.MediaProxy != nil {
+		feed.MediaProxy = *f.MediaProxy
 	}
 
 	if f.UserAgent != nil {

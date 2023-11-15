@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"miniflux.app/v2/internal/config"
+	"miniflux.app/v2/internal/integration/mercury"
 	"miniflux.app/v2/internal/metric"
 	"miniflux.app/v2/internal/model"
 	"miniflux.app/v2/internal/reader/fetcher"
@@ -32,7 +33,7 @@ var (
 )
 
 // ProcessFeedEntries downloads original web page for entries and apply filters.
-func ProcessFeedEntries(store *storage.Storage, feed *model.Feed, user *model.User, forceRefresh bool) {
+func ProcessFeedEntries(store *storage.Storage, feed *model.Feed, user *model.User, integration *model.Integration, forceRefresh bool) {
 	var filteredEntries model.Entries
 
 	// Process older entries first
@@ -53,7 +54,7 @@ func ProcessFeedEntries(store *storage.Storage, feed *model.Feed, user *model.Us
 
 		websiteURL := getUrlFromEntry(feed, entry)
 		entryIsNew := !store.EntryURLExists(feed.ID, entry.URL)
-		if feed.Crawler && (entryIsNew || forceRefresh) {
+		if (feed.Crawler || feed.MercuryCrawler) && (entryIsNew || forceRefresh) {
 			slog.Debug("Scraping entry",
 				slog.Int64("user_id", user.ID),
 				slog.Int64("entry_id", entry.ID),
@@ -72,11 +73,18 @@ func ProcessFeedEntries(store *storage.Storage, feed *model.Feed, user *model.Us
 			requestBuilder.UseProxy(feed.FetchViaProxy)
 			requestBuilder.IgnoreTLSErrors(feed.AllowSelfSignedCertificates)
 
-			content, scraperErr := scraper.ScrapeWebsite(
-				requestBuilder,
-				websiteURL,
-				feed.ScraperRules,
-			)
+			var content string
+			var scraperErr error
+			if feed.MercuryCrawler {
+
+				content, scraperErr = mercury.NewClient("").GetFullText(websiteURL)
+			} else {
+				content, scraperErr = scraper.ScrapeWebsite(
+					requestBuilder,
+					websiteURL,
+					feed.ScraperRules,
+				)
+			}
 
 			if config.Opts.HasMetricsCollector() {
 				status := "success"
@@ -161,7 +169,7 @@ func matchField(pattern, value string) bool {
 }
 
 // ProcessEntryWebPage downloads the entry web page and apply rewrite rules.
-func ProcessEntryWebPage(feed *model.Feed, entry *model.Entry, user *model.User) error {
+func ProcessEntryWebPage(feed *model.Feed, entry *model.Entry, user *model.User, integration *model.Integration) error {
 	startTime := time.Now()
 	websiteURL := getUrlFromEntry(feed, entry)
 
@@ -173,11 +181,17 @@ func ProcessEntryWebPage(feed *model.Feed, entry *model.Entry, user *model.User)
 	requestBuilder.UseProxy(feed.FetchViaProxy)
 	requestBuilder.IgnoreTLSErrors(feed.AllowSelfSignedCertificates)
 
-	content, scraperErr := scraper.ScrapeWebsite(
-		requestBuilder,
-		websiteURL,
-		feed.ScraperRules,
-	)
+	var content string
+	var scraperErr error
+	if feed.MercuryCrawler {
+		content, scraperErr = mercury.NewClient(integration.MercuryURL).GetFullText(websiteURL)
+	} else {
+		content, scraperErr = scraper.ScrapeWebsite(
+			requestBuilder,
+			websiteURL,
+			feed.ScraperRules,
+		)
+	}
 
 	if config.Opts.HasMetricsCollector() {
 		status := "success"
