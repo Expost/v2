@@ -79,6 +79,8 @@ type IntegrationForm struct {
 	WebhookSecret                    string
 	RSSBridgeEnabled                 bool
 	RSSBridgeURL                     string
+	MercuryEnabled                   bool
+	MercuryURL                       string
 }
 
 // Merge copy form values to the model.
@@ -147,6 +149,8 @@ func (i IntegrationForm) Merge(integration *model.Integration) {
 	integration.WebhookURL = i.WebhookURL
 	integration.RSSBridgeEnabled = i.RSSBridgeEnabled
 	integration.RSSBridgeURL = i.RSSBridgeURL
+	integration.MercuryEnabled = i.MercuryEnabled
+	integration.MercuryURL = i.MercuryURL
 }
 
 // NewIntegrationForm returns a new IntegrationForm.
@@ -218,6 +222,8 @@ func NewIntegrationForm(r *http.Request) *IntegrationForm {
 		WebhookURL:                       r.FormValue("webhook_url"),
 		RSSBridgeEnabled:                 r.FormValue("rssbridge_enabled") == "1",
 		RSSBridgeURL:                     r.FormValue("rssbridge_url"),
+		MercuryEnabled:                   r.FormValue("mercury_enabled") == "1",
+		MercuryURL:                       r.FormValue("mercury_url"),
 	}
 }
 

@@ -73,4 +73,6 @@ type Integration struct {
 	WebhookSecret                    string
 	RSSBridgeEnabled                 bool
 	RSSBridgeURL                     string
+	MercuryEnabled                   bool
+	MercuryURL                       string
 }

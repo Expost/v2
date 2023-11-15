@@ -417,6 +417,22 @@
             </div>
         </div>
     </details>
+
+    <details {{ if .form.MercuryEnabled }}open{{ end }}>
+        <summary>Mercury-API</summary>
+        <div class="form-section">
+            <label>
+                <input type="checkbox" name="mercury_enabled" value="1" {{ if .form.MercuryEnabled }}checked{{ end }}> {{ t "form.integration.mercury_activate" }}
+            </label>
+
+            <label for="form-mercury-url">{{ t "form.integration.mercury_url" }}</label>
+            <input type="url" name="mercury_url" id="form-mercury-url" value="{{ .form.MercuryURL }}" spellcheck="false">
+
+            <div class="buttons">
+                <button type="submit" class="button button-primary" data-label-loading="{{ t "form.submit.saving" }}">{{ t "action.update" }}</button>
+            </div>
+        </div>
+    </details>
 </form>
 
 <h3>{{ t "page.integration.bookmarklet" }}</h3>

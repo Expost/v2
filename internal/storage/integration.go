@@ -176,7 +176,9 @@ func (s *Storage) Integration(userID int64) (*model.Integration, error) {
 			webhook_url,
 			webhook_secret,
 			rssbridge_enabled,
-			rssbridge_url
+			rssbridge_url,
+			mercury_enabled,
+			mercury_url
 		FROM
 			integrations
 		WHERE
@@ -252,6 +254,8 @@ func (s *Storage) Integration(userID int64) (*model.Integration, error) {
 		&integration.WebhookSecret,
 		&integration.RSSBridgeEnabled,
 		&integration.RSSBridgeURL,
+		&integration.MercuryEnabled,
+		&integration.MercuryURL,
 	)
 	switch {
 	case err == sql.ErrNoRows:
@@ -335,9 +339,11 @@ func (s *Storage) UpdateIntegration(integration *model.Integration) error {
 			webhook_url=$64,
 			webhook_secret=$65,
 			rssbridge_enabled=$66,
-			rssbridge_url=$67
+			rssbridge_url=$67,
+			mercury_enabled=$68,
+			mercury_url=$69
 		WHERE
-			user_id=$68
+			user_id=$70
 	`
 	_, err := s.db.Exec(
 		query,
@@ -408,6 +414,8 @@ func (s *Storage) UpdateIntegration(integration *model.Integration) error {
 		integration.WebhookSecret,
 		integration.RSSBridgeEnabled,
 		integration.RSSBridgeURL,
+		integration.MercuryEnabled,
+		integration.MercuryURL,
 		integration.UserID,
 	)
 
