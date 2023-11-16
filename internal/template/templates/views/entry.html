@@ -186,7 +186,7 @@
             {{ end }}
         {{end}}
         {{ if .user }}
-            {{ noescape (proxyFilter .entry.Content) }}
+            {{ noescape (proxyFilter .entry.Content .entry.Feed.MediaProxy) }}
         {{ else }}
             {{ noescape .entry.Content }}
         {{ end }}

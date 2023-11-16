@@ -17,19 +17,19 @@ import (
 type urlProxyRewriter func(router *mux.Router, url string) string
 
 // ProxyRewriter replaces media URLs with internal proxy URLs.
-func ProxyRewriter(router *mux.Router, data string) string {
-	return genericProxyRewriter(router, ProxifyURL, data)
+func ProxyRewriter(router *mux.Router, data string, mediaProxy bool) string {
+	return genericProxyRewriter(router, ProxifyURL, data, mediaProxy)
 }
 
 // AbsoluteProxyRewriter do the same as ProxyRewriter except it uses absolute URLs.
-func AbsoluteProxyRewriter(router *mux.Router, host, data string) string {
+func AbsoluteProxyRewriter(router *mux.Router, host, data string, mediaProxy bool) string {
 	proxifyFunction := func(router *mux.Router, url string) string {
 		return AbsoluteProxifyURL(router, host, url)
 	}
-	return genericProxyRewriter(router, proxifyFunction, data)
+	return genericProxyRewriter(router, proxifyFunction, data, mediaProxy)
 }
 
-func genericProxyRewriter(router *mux.Router, proxifyFunction urlProxyRewriter, data string) string {
+func genericProxyRewriter(router *mux.Router, proxifyFunction urlProxyRewriter, data string, mediaProxy bool) string {
 	proxyOption := config.Opts.ProxyOption()
 	if proxyOption == "none" {
 		return data
@@ -45,26 +45,26 @@ func genericProxyRewriter(router *mux.Router, proxifyFunction urlProxyRewriter, 
 		case "image":
 			doc.Find("img").Each(func(i int, img *goquery.Selection) {
 				if srcAttrValue, ok := img.Attr("src"); ok {
-					if !isDataURL(srcAttrValue) && (proxyOption == "all" || !urllib.IsHTTPS(srcAttrValue)) {
+					if !isDataURL(srcAttrValue) && (mediaProxy || proxyOption == "all" || !urllib.IsHTTPS(srcAttrValue)) {
 						img.SetAttr("src", proxifyFunction(router, srcAttrValue))
 					}
 				}
 
 				if srcsetAttrValue, ok := img.Attr("srcset"); ok {
-					proxifySourceSet(img, router, proxifyFunction, proxyOption, srcsetAttrValue)
+					proxifySourceSet(img, router, proxifyFunction, proxyOption, srcsetAttrValue, mediaProxy)
 				}
 			})
 
 			doc.Find("picture source").Each(func(i int, sourceElement *goquery.Selection) {
 				if srcsetAttrValue, ok := sourceElement.Attr("srcset"); ok {
-					proxifySourceSet(sourceElement, router, proxifyFunction, proxyOption, srcsetAttrValue)
+					proxifySourceSet(sourceElement, router, proxifyFunction, proxyOption, srcsetAttrValue, mediaProxy)
 				}
 			})
 
 		case "audio":
 			doc.Find("audio").Each(func(i int, audio *goquery.Selection) {
 				if srcAttrValue, ok := audio.Attr("src"); ok {
-					if !isDataURL(srcAttrValue) && (proxyOption == "all" || !urllib.IsHTTPS(srcAttrValue)) {
+					if !isDataURL(srcAttrValue) && (mediaProxy || proxyOption == "all" || !urllib.IsHTTPS(srcAttrValue)) {
 						audio.SetAttr("src", proxifyFunction(router, srcAttrValue))
 					}
 				}
@@ -72,7 +72,7 @@ func genericProxyRewriter(router *mux.Router, proxifyFunction urlProxyRewriter, 
 
 			doc.Find("audio source").Each(func(i int, sourceElement *goquery.Selection) {
 				if srcAttrValue, ok := sourceElement.Attr("src"); ok {
-					if !isDataURL(srcAttrValue) && (proxyOption == "all" || !urllib.IsHTTPS(srcAttrValue)) {
+					if !isDataURL(srcAttrValue) && (mediaProxy || proxyOption == "all" || !urllib.IsHTTPS(srcAttrValue)) {
 						sourceElement.SetAttr("src", proxifyFunction(router, srcAttrValue))
 					}
 				}
@@ -81,7 +81,7 @@ func genericProxyRewriter(router *mux.Router, proxifyFunction urlProxyRewriter, 
 		case "video":
 			doc.Find("video").Each(func(i int, video *goquery.Selection) {
 				if srcAttrValue, ok := video.Attr("src"); ok {
-					if !isDataURL(srcAttrValue) && (proxyOption == "all" || !urllib.IsHTTPS(srcAttrValue)) {
+					if !isDataURL(srcAttrValue) && (mediaProxy || proxyOption == "all" || !urllib.IsHTTPS(srcAttrValue)) {
 						video.SetAttr("src", proxifyFunction(router, srcAttrValue))
 					}
 				}
@@ -89,7 +89,7 @@ func genericProxyRewriter(router *mux.Router, proxifyFunction urlProxyRewriter, 
 
 			doc.Find("video source").Each(func(i int, sourceElement *goquery.Selection) {
 				if srcAttrValue, ok := sourceElement.Attr("src"); ok {
-					if !isDataURL(srcAttrValue) && (proxyOption == "all" || !urllib.IsHTTPS(srcAttrValue)) {
+					if !isDataURL(srcAttrValue) && (mediaProxy || proxyOption == "all" || !urllib.IsHTTPS(srcAttrValue)) {
 						sourceElement.SetAttr("src", proxifyFunction(router, srcAttrValue))
 					}
 				}
@@ -105,11 +105,11 @@ func genericProxyRewriter(router *mux.Router, proxifyFunction urlProxyRewriter, 
 	return output
 }
 
-func proxifySourceSet(element *goquery.Selection, router *mux.Router, proxifyFunction urlProxyRewriter, proxyOption, srcsetAttrValue string) {
+func proxifySourceSet(element *goquery.Selection, router *mux.Router, proxifyFunction urlProxyRewriter, proxyOption, srcsetAttrValue string, mediaProxy bool) {
 	imageCandidates := sanitizer.ParseSrcSetAttribute(srcsetAttrValue)
 
 	for _, imageCandidate := range imageCandidates {
-		if !isDataURL(imageCandidate.ImageURL) && (proxyOption == "all" || !urllib.IsHTTPS(imageCandidate.ImageURL)) {
+		if !isDataURL(imageCandidate.ImageURL) && (mediaProxy || proxyOption == "all" || !urllib.IsHTTPS(imageCandidate.ImageURL)) {
 			imageCandidate.ImageURL = proxifyFunction(router, imageCandidate.ImageURL)
 		}
 	}

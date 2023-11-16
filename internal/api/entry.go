@@ -36,7 +36,7 @@ func (h *handler) getEntryFromBuilder(w http.ResponseWriter, r *http.Request, b 
 		return
 	}
 
-	entry.Content = proxy.AbsoluteProxyRewriter(h.router, r.Host, entry.Content)
+	entry.Content = proxy.AbsoluteProxyRewriter(h.router, r.Host, entry.Content, entry.Feed.MediaProxy)
 	proxyOption := config.Opts.ProxyOption()
 
 	for i := range entry.Enclosures {
@@ -164,7 +164,7 @@ func (h *handler) findEntries(w http.ResponseWriter, r *http.Request, feedID int
 	}
 
 	for i := range entries {
-		entries[i].Content = proxy.AbsoluteProxyRewriter(h.router, r.Host, entries[i].Content)
+		entries[i].Content = proxy.AbsoluteProxyRewriter(h.router, r.Host, entries[i].Content, entries[i].Feed.MediaProxy)
 	}
 
 	json.OK(w, r, &entriesResponse{Total: count, Entries: entries})

@@ -1000,7 +1000,7 @@ func (h *handler) streamItemContentsHandler(w http.ResponseWriter, r *http.Reque
 			categories = append(categories, userStarred)
 		}
 
-		entry.Content = proxy.AbsoluteProxyRewriter(h.router, r.Host, entry.Content)
+		entry.Content = proxy.AbsoluteProxyRewriter(h.router, r.Host, entry.Content, entry.Feed.MediaProxy)
 		proxyOption := config.Opts.ProxyOption()
 
 		for i := range entry.Enclosures {
