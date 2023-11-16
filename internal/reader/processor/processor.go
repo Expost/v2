@@ -76,8 +76,7 @@ func ProcessFeedEntries(store *storage.Storage, feed *model.Feed, user *model.Us
 			var content string
 			var scraperErr error
 			if feed.MercuryCrawler {
-
-				content, scraperErr = mercury.NewClient("").GetFullText(websiteURL)
+				content, scraperErr = mercury.NewClient(integration.MercuryURL).GetFullText(websiteURL)
 			} else {
 				content, scraperErr = scraper.ScrapeWebsite(
 					requestBuilder,

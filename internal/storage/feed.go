@@ -229,10 +229,12 @@ func (s *Storage) CreateFeed(feed *model.Feed) error {
 			hide_globally,
 			url_rewrite_rules,
 			no_media_player,
-			apprise_service_urls
+			apprise_service_urls,
+			mercury_crawler,
+			media_proxy
 		)
 		VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
 		RETURNING
 			id
 	`
@@ -262,6 +264,8 @@ func (s *Storage) CreateFeed(feed *model.Feed) error {
 		feed.UrlRewriteRules,
 		feed.NoMediaPlayer,
 		feed.AppriseServiceURLs,
+		feed.MercuryCrawler,
+		feed.MediaProxy,
 	).Scan(&feed.ID)
 	if err != nil {
 		return fmt.Errorf(`store: unable to create feed %q: %v`, feed.FeedURL, err)
@@ -333,9 +337,11 @@ func (s *Storage) UpdateFeed(feed *model.Feed) (err error) {
 			hide_globally=$24,
 			url_rewrite_rules=$25,
 			no_media_player=$26,
-			apprise_service_urls=$27
+			apprise_service_urls=$27,
+			mercury_crawler=$28,
+			media_proxy=$29
 		WHERE
-			id=$28 AND user_id=$29
+			id=$30 AND user_id=$31
 	`
 	_, err = s.db.Exec(query,
 		feed.FeedURL,
@@ -365,6 +371,8 @@ func (s *Storage) UpdateFeed(feed *model.Feed) (err error) {
 		feed.UrlRewriteRules,
 		feed.NoMediaPlayer,
 		feed.AppriseServiceURLs,
+		feed.MercuryCrawler,
+		feed.MediaProxy,
 		feed.ID,
 		feed.UserID,
 	)

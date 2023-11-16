@@ -162,7 +162,7 @@
                                data-save-url="{{ route "saveEnclosureProgression" "enclosureID" .ID }}"
                         >
                             {{ if (and $.user (mustBeProxyfied "audio")) }}
-                            <source src="{{ proxyURL .URL }}" type="{{ .Html5MimeType }}">
+                            <source src="{{ proxyURL .URL .entry.Feed.MediaProxy }}" type="{{ .Html5MimeType }}">
                             {{ else }}
                             <source src="{{ .URL | safeURL }}" type="{{ .Html5MimeType }}">
                             {{ end }}
@@ -175,7 +175,7 @@
                                data-save-url="{{ route "saveEnclosureProgression" "enclosureID" .ID }}"
                         >
                             {{ if (and $.user (mustBeProxyfied "video")) }}
-                            <source src="{{ proxyURL .URL }}" type="{{ .Html5MimeType }}">
+                            <source src="{{ proxyURL .URL .entry.Feed.MediaProxy }}" type="{{ .Html5MimeType }}">
                             {{ else }}
                             <source src="{{ .URL | safeURL }}" type="{{ .Html5MimeType }}">
                             {{ end }}
@@ -204,7 +204,7 @@
                                data-save-url="{{ route "saveEnclosureProgression" "enclosureID" .ID }}"
                         >
 				{{ if (and $.user (mustBeProxyfied "audio")) }}
-				    <source src="{{ proxyURL .URL }}" type="{{ .Html5MimeType }}">
+				    <source src="{{ proxyURL .URL .entry.Feed.MediaProxy }}" type="{{ .Html5MimeType }}">
 				{{ else }}
 				    <source src="{{ .URL | safeURL }}" type="{{ .Html5MimeType }}">
 				{{ end }}
@@ -217,7 +217,7 @@
                                data-save-url="{{ route "saveEnclosureProgression" "enclosureID" .ID }}"
                         >
 				{{ if (and $.user (mustBeProxyfied "video")) }}
-				    <source src="{{ proxyURL .URL }}" type="{{ .Html5MimeType }}">
+				    <source src="{{ proxyURL .URL .entry.Feed.MediaProxy }}" type="{{ .Html5MimeType }}">
 				{{ else }}
 				    <source src="{{ .URL | safeURL }}" type="{{ .Html5MimeType }}">
 				{{ end }}
@@ -226,7 +226,7 @@
                 {{ else if hasPrefix .MimeType "image/" }}
                     <div class="enclosure-image">
                         {{ if (and $.user (mustBeProxyfied "image")) }}
-                            <img src="{{ proxyURL .URL }}" title="{{ .URL }} ({{ .MimeType }})" loading="lazy" alt="{{ .URL }} ({{ .MimeType }})">
+                            <img src="{{ proxyURL .URL .entry.Feed.MediaProxy }}" title="{{ .URL }} ({{ .MimeType }})" loading="lazy" alt="{{ .URL }} ({{ .MimeType }})">
                         {{ else }}
                             <img src="{{ .URL | safeURL }}" title="{{ .URL }} ({{ .MimeType }})" loading="lazy" alt="{{ .URL }} ({{ .MimeType }})">
                         {{ end }}

@@ -163,7 +163,9 @@ func (f *FeedQueryBuilder) GetFeeds() (model.Feeds, error) {
 			c.hide_globally as category_hidden,
 			fi.icon_id,
 			u.timezone,
-			f.apprise_service_urls
+			f.apprise_service_urls,
+			f.mercury_crawler,
+			f.media_proxy
 		FROM
 			feeds f
 		LEFT JOIN
@@ -230,6 +232,8 @@ func (f *FeedQueryBuilder) GetFeeds() (model.Feeds, error) {
 			&iconID,
 			&tz,
 			&feed.AppriseServiceURLs,
+			&feed.MercuryCrawler,
+			&feed.MediaProxy,
 		)
 
 		if err != nil {

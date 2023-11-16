@@ -16,6 +16,8 @@ type SubscriptionForm struct {
 	URL                         string
 	CategoryID                  int64
 	Crawler                     bool
+	MercuryCrawler              bool
+	MediaProxy                  bool
 	FetchViaProxy               bool
 	AllowSelfSignedCertificates bool
 	UserAgent                   string
@@ -65,6 +67,8 @@ func NewSubscriptionForm(r *http.Request) *SubscriptionForm {
 		URL:                         r.FormValue("url"),
 		CategoryID:                  int64(categoryID),
 		Crawler:                     r.FormValue("crawler") == "1",
+		MercuryCrawler:              r.FormValue("mercury_crawler") == "1",
+		MediaProxy:                  r.FormValue("media_proxy") == "1",
 		AllowSelfSignedCertificates: r.FormValue("allow_self_signed_certificates") == "1",
 		FetchViaProxy:               r.FormValue("fetch_via_proxy") == "1",
 		UserAgent:                   r.FormValue("user_agent"),

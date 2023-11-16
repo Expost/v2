@@ -62,10 +62,9 @@ func (f *funcMap) Map() template.FuncMap {
 		"proxyFilter": func(data string, mediaProxy bool) string {
 			return proxy.ProxyRewriter(f.router, data, mediaProxy)
 		},
-		"proxyURL": func(link string) string {
+		"proxyURL": func(link string, mediaProxy bool) string {
 			proxyOption := config.Opts.ProxyOption()
-
-			if proxyOption == "all" || (proxyOption != "none" && !urllib.IsHTTPS(link)) {
+			if mediaProxy || proxyOption == "all" || (proxyOption != "none" && !urllib.IsHTTPS(link)) {
 				return proxy.ProxifyURL(f.router, link)
 			}
 
